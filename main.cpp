@@ -6,6 +6,27 @@
 
 using namespace std;
 
+void printColoredWord(const string &response, const string &word)
+{
+    for (size_t i = 0; i < word.length(); i++)
+    {
+        switch (response[i])
+        {
+        case 'g':
+            cout << "\033[32m" << word[i];
+            break;
+        case 'y':
+            cout << "\033[33m" << word[i];
+            break;
+        case 'r':
+            cout << "\033[31m" << word[i];
+            break;
+        }
+        cout << "\033[0m";
+    }
+    cout << endl;
+}
+
 int main()
 {
 
@@ -29,54 +50,33 @@ int main()
     cout << "what is the output from this word?" << endl;
     cout << " g: correct spot \n y: correct letter and wrong spot\n r: wrong letter" << endl;
 
-    string startWord = "adieu";
-
+    string currentGuess = "adieu";
     string wordResponse;
-    cin >> wordResponse;
+    int tries = 0;
 
-    cout << "Is this the correct output?" << endl;
-
-    int k = 0;
-
-    for (int i = 0; i < startWord.length(); i++)
+    while (tries < 6)
     {
+        cout << "Guess [" << tries + 1 << "]: " << currentGuess << endl;
+        cout << "Enter the response (g, y, r for each letter): ";
+        cin >> wordResponse;
 
-        if (wordResponse[i] == 'g')
+        printColoredWord(wordResponse, currentGuess);
+
+        if (wordResponse == "ggggg")
         {
-            cout << "\033[32m" << startWord.at(k);
+            cout << "Correct! You've guessed the word!" << endl;
+            break;
         }
-        else if (wordResponse[i] == 'y')
-        {
-            cout << "\033[33m" << startWord.at(k);
-        }
-        else if (wordResponse[i] == 'r')
-        {
-            cout << "\033[31m" << startWord.at(k);
-        }
-        k++;
-        cout << "\033[0m";
+
+        currentGuess = bot.makeNewGuess(wordResponse, currentGuess);
+        cout << "Number of possible words left: " << bot.getWordArraySize() << endl;
+        tries++;
     }
 
-    cout << endl;
-
-    cout << "y: yes" << endl;
-    cout << "n: no" << endl;
-
-    char response;
-
-    cin >> response;
-
-    if (response == 'y')
+    if (tries == 5)
     {
-        bot.makeNewGuess(wordResponse, startWord);
-        cout << "The number of words in the array after removals is: " << bot.getArrayWordCount() << endl;
+        cout << "You've reached the maximum number of tries." << endl;
     }
-    else
-    {
-        cout << "Input not correct, to be dealt with later" << endl;
-    }
-
-    cout << "The number of words in the array is: " << bot.getArrayWordCount() << endl;
 
     file.close();
 

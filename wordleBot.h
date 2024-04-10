@@ -18,13 +18,19 @@ private:
 public:
     wordleBot();
     ~wordleBot();
-    void makeNewGuess(string response, string word);
-    void deleteWhenG(char letter);
+    void deleteWhenG(char letter, int index);
+    void deleteWhenY(char letter, int index);
 
-    void deleteWordsfromArray(char letter);
+    string makeNewGuess(string response, string word);
+
+    void deleteWordsfromArray(char letter, const string &response, int currentIndex, const string &word);
+    void deleteWordsfromArrayG(char letter);
     void addToArray(string word, int index);
 
+    void printVector();
+
     int getArrayWordCount() { return arrayWordCount; }
+    int getWordArraySize() { return wordArray.size(); }
 };
 
 #endif
