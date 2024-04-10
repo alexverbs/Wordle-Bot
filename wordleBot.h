@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 
@@ -27,10 +28,17 @@ public:
     void deleteWordsfromArrayG(char letter);
     void addToArray(string word, int index);
 
+    string chooseNewWord();
+
     void printVector();
 
     int getArrayWordCount() { return arrayWordCount; }
     int getWordArraySize() { return wordArray.size(); }
+
+    int getTierValue(char letter, const std::unordered_map<char, int> &tierMap);
+    string getLowestValueWord(const std::vector<std::string> &words);
+
+    float chanceRight();
 };
 
 #endif

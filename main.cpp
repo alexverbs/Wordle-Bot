@@ -70,6 +70,7 @@ int main()
 
         currentGuess = bot.makeNewGuess(wordResponse, currentGuess);
         cout << "Number of possible words left: " << bot.getWordArraySize() << endl;
+        cout << "There is a " << bot.chanceRight() << "% chance that this word is correct!" << endl;
         tries++;
     }
 
