@@ -23,34 +23,49 @@ void wordleBot::addToArray(string word, int index)
 
 void wordleBot::deleteWordsfromArray(char letter, const string &response, int currentIndex, const string &word)
 {
-    // The flag to check if the letter is valid somewhere else other than currentIndex
     bool isLetterValidElsewhere = false;
     for (int i = 0; i < response.length(); i++)
     {
-        if (i != currentIndex && response[i] != 'r' && word.at(i) == letter) // Typo here, it should check for 'y' or 'g' as well.
+        if (i != currentIndex && (response[i] == 'g' || response[i] == 'y') && word.at(i) == letter)
         {
             isLetterValidElsewhere = true;
             break;
         }
     }
 
-    // If the letter is not valid elsewhere, delete words containing this letter
     if (!isLetterValidElsewhere)
     {
+        // If the letter is not valid elsewhere, delete words containing this letter anywhere
         for (int i = wordArray.size() - 1; i >= 0; i--)
         {
-            if (wordArray.at(i).find(letter) != string::npos && wordArray.at(i).at(currentIndex) != letter)
+            if (wordArray.at(i).find(letter) != string::npos)
             {
                 wordArray.erase(wordArray.begin() + i);
             }
         }
     }
-    // If the letter is valid elsewhere, only delete words where the letter is at currentIndex
     else
     {
+        // If the letter is valid elsewhere, delete words where the letter is not at its correct indices
         for (int i = wordArray.size() - 1; i >= 0; i--)
         {
-            if (wordArray.at(i).at(currentIndex) == letter)
+            string currentWord = wordArray.at(i);
+            bool hasIncorrectPosition = false;
+
+            // Check each instance of the letter in the current word
+            for (int j = 0; j < currentWord.length(); j++)
+            {
+                if (currentWord.at(j) == letter)
+                {
+                    if (response.at(j) == 'r' || (response.at(j) == 'y' && j == currentIndex))
+                    {
+                        hasIncorrectPosition = true;
+                        break;
+                    }
+                }
+            }
+
+            if (hasIncorrectPosition)
             {
                 wordArray.erase(wordArray.begin() + i);
             }
@@ -96,101 +111,67 @@ void wordleBot::deleteWhenY(char letter, int index)
     }
 }
 
+void wordleBot::refineWordsBasedOnFeedback(const string &response, const string &word)
+{
+    vector<bool> excludeFromPosition(26, false); // Tracks letters that must be excluded from specific positions
+    vector<bool> validElsewhere(26, false);      // Tracks if letters are valid in other positions
+
+    // Process responses to set flags
+    for (int i = 0; i < response.length(); i++)
+    {
+        if (response.at(i) == 'g' || response.at(i) == 'y')
+        {
+            validElsewhere[word.at(i) - 'a'] = true; // Mark letter as valid elsewhere
+        }
+    }
+
+    // Remove words based on feedback
+    for (int j = wordArray.size() - 1; j >= 0; j--)
+    {
+        bool removeWord = false;
+        for (int k = 0; k < response.length(); k++)
+        {
+            if (response.at(k) == 'r' && !validElsewhere[word.at(k) - 'a'] && wordArray.at(j).find(word.at(k)) != string::npos)
+            {
+                removeWord = true; // Mark to remove if 'r' and not valid elsewhere
+                break;
+            }
+        }
+        if (removeWord)
+        {
+            wordArray.erase(wordArray.begin() + j);
+        }
+    }
+}
+
 string wordleBot::makeNewGuess(string response, string word)
 {
-    // Handle green responses ('g') - letter is correct and in the correct position
+    // Refine word list based on previous feedback
+    refineWordsBasedOnFeedback(response, word);
+
+    // Process each type of response
     for (int i = 0; i < response.length(); i++)
     {
         if (response.at(i) == 'g')
         {
             deleteWhenG(word.at(i), i);
         }
-    }
-
-    // Handle yellow responses ('y') - letter is correct but in the wrong position
-    for (int i = 0; i < response.length(); i++)
-    {
-        if (response.at(i) == 'y')
+        else if (response.at(i) == 'y')
         {
-            // Delete the word if it doesn't contain the yellow letter at all
-            // or if it contains the yellow letter in the position where it shouldn't be
             deleteWhenY(word.at(i), i);
-
-            // If a letter appears as yellow and is not in any green positions,
-            // make sure it is present in the remaining words but not at the 'y' index
-            bool isLetterGreenSomewhere = false;
-            for (int j = 0; j < response.length(); j++)
-            {
-                if (response.at(j) == 'g' && word.at(j) == word.at(i))
-                {
-                    isLetterGreenSomewhere = true;
-                    break;
-                }
-            }
-            if (!isLetterGreenSomewhere)
-            {
-                for (int j = wordArray.size() - 1; j >= 0; j--)
-                {
-                    string currentWord = wordArray.at(j);
-                    if (currentWord.find(word.at(i)) == string::npos ||
-                        currentWord.at(i) == word.at(i))
-                    {
-                        wordArray.erase(wordArray.begin() + j);
-                    }
-                }
-            }
         }
-    }
-
-    // Handle red responses ('r') - letter is not in the word at this position
-    for (int i = 0; i < response.length(); i++)
-    {
-        if (response.at(i) == 'r')
+        else if (response.at(i) == 'r')
         {
-            bool isLetterValidElsewhere = false;
-            // Check if the 'r' letter appears as 'g' or 'y' anywhere else in the response
-            for (int j = 0; j < response.length(); j++)
-            {
-                if (i != j && (response.at(j) == 'g' || response.at(j) == 'y') && word.at(j) == word.at(i))
-                {
-                    isLetterValidElsewhere = true;
-                    break;
-                }
-            }
-            // If the 'r' letter does not appear as 'g' or 'y' anywhere else,
-            // remove all words that contain this letter
-            if (!isLetterValidElsewhere)
-            {
-                for (int j = wordArray.size() - 1; j >= 0; j--)
-                {
-                    if (wordArray.at(j).find(word.at(i)) != string::npos)
-                    {
-                        wordArray.erase(wordArray.begin() + j);
-                    }
-                }
-            }
-            // If the 'r' letter appears as 'g' or 'y' somewhere else,
-            // only remove words that have the letter in the current position
-            else
-            {
-                for (int j = wordArray.size() - 1; j >= 0; j--)
-                {
-                    if (wordArray.at(j).at(i) == word.at(i))
-                    {
-                        wordArray.erase(wordArray.begin() + j);
-                    }
-                }
-            }
+            deleteWordsfromArray(word.at(i), response, i, word);
         }
     }
 
-    // Select the new guess
+    // Determine the new guess based on refined word list
     string newGuess = "";
     if (!wordArray.empty())
     {
         newGuess = getLowestValueWord(wordArray);
     }
-
     return newGuess;
 }
 

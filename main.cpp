@@ -45,7 +45,7 @@ int main()
 
     cout << "Welcome to Alex Verbesey's Wordle Bot!" << endl;
     cout << "This bot will help you win the game Wordle!" << endl;
-    cout << "We will start with the word: Adieu" << endl;
+    cout << "Enter this as your frist word: Adieu" << endl;
     cout << "---------------------------------------------" << endl;
     cout << "what is the output from this word?" << endl;
     cout << " g: correct spot \n y: correct letter and wrong spot\n r: wrong letter" << endl;
@@ -56,7 +56,7 @@ int main()
 
     while (tries < 6)
     {
-        cout << "Guess [" << tries + 1 << "]: " << currentGuess << endl;
+        cout << "Guess [" << tries + 1 << "] Enter this: " << currentGuess << endl;
         cout << "Enter the response (g, y, r for each letter): ";
         cin >> wordResponse;
 

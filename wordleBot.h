@@ -27,6 +27,7 @@ public:
     void deleteWordsfromArray(char letter, const string &response, int currentIndex, const string &word);
     void deleteWordsfromArrayG(char letter);
     void addToArray(string word, int index);
+    void refineWordsBasedOnFeedback(const string &response, const string &word);
 
     string chooseNewWord();
 
@@ -34,6 +35,8 @@ public:
 
     int getArrayWordCount() { return arrayWordCount; }
     int getWordArraySize() { return wordArray.size(); }
+
+    void handleRResponse(const string &response, const string &word);
 
     int getTierValue(char letter, const std::unordered_map<char, int> &tierMap);
     string getLowestValueWord(const std::vector<std::string> &words);
